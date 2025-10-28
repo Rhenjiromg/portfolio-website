@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { Calendar, ArrowRight, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NewsItem } from "../types/news";
+import { getNews } from "../utils/info";
 
 // Utility: format a nice short date
 function fmtDate(iso: string) {
@@ -36,21 +37,25 @@ function excerpt(text: string, n = 160) {
   return t.length > n ? t.slice(0, n - 1) + "…" : t;
 }
 
-/**
- * News — portfolio news/updates section styled to match LandingInfo.
- *
- * Props:
- * - items: NewsItem[] (unsorted)
- * - title?: string (defaults to "See What I'm Up To")
- * - ctaHref?: string (link to full news page)
- */
-export default function News({
-  items = [],
-  ctaHref = "/news",
-}: {
-  items?: NewsItem[];
-  ctaHref?: string;
-}) {
+export default function News() {
+  const [items, setItems] = useState<NewsItem[]>([]);
+  useEffect(() => {
+    let isMounted = true;
+
+    (async () => {
+      try {
+        const res = await getNews();
+        if (isMounted) setItems(res);
+      } catch (e) {
+        console.error("getProjects failed", e);
+        if (isMounted) setItems([]);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   const ordered = sortNews(items);
   const topForDesktop = ordered.slice(0, 3);
   const topForMobile = ordered.slice(0, 1);
@@ -99,7 +104,7 @@ export default function News({
               aria-label="View all news"
               className="bg-[]"
             >
-              <Link href={ctaHref}>
+              <Link href={"/news"}>
                 View all
                 <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
               </Link>

@@ -8,7 +8,6 @@ export default function LandingInfo({
   title = "Software Engineer",
   summary = "I craft performant, delightful apps with modern web technologies. Open to impactful opportunities and collaborations.",
   location = "Hayward, CA",
-  resumeUrl = "#",
   email = "",
   socialItems = [
     {
@@ -56,94 +55,113 @@ export default function LandingInfo({
         />
       </div>
       {/* Content Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="flex flex-col items-center justify-center w-full py-2"
-        aria-label="Intro / hero section"
-      >
-        <div className="rounded-2xl overflow-hidden">
-          <img
-            src="/me.jpeg"
-            alt="Portrait of me"
-            className="rounded-2xl w-90 h-90 md:w-110 md:h-110 object-cover"
-          />
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="mx-auto max-w-3xl rounded-2xl border bg-card/60 p-6 backdrop-blur-2xl supports-[backdrop-filter]:bg-card/50 sm:p-10 shadow-lg"
-        aria-label="Intro / hero section"
-      >
-        {/* Eyebrow */}
+      <div className="flex flex-row sm:flex-col">
         <motion.div
-          initial={{ opacity: 0, y: 6 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground"
+          transition={{ duration: 0.6 }}
+          className="hidden sm:flex items-center justify-center w-full sm:py-2"
+          aria-label="Intro / hero section"
+          aria-hidden={true}
         >
-          <span className="inline-flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="sr-only">Location:</span>
-            <span>{location}</span>
-          </span>
+          <div className="rounded-2xl overflow-hidden flex flex-col">
+            <img
+              src="/me.jpeg"
+              alt="Portrait of me"
+              className="rounded-2xl w-30 h-30 md:w-90 md:h-90 object-cover"
+            />
+          </div>
         </motion.div>
 
-        {/* Name & Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.5 }}
-          className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl"
-        >
-          {name}
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="mt-2 text-xl text-muted-foreground sm:text-2xl"
-          aria-live="polite"
-          aria-atomic="true"
-          aria-hidden="true"
-        >
-          <span className="inline-flex items-center text-balance">
-            {text}
-            <span
-              className={[
-                "ml-0.5 inline-block h-[1.2em] w-[1px] align-middle",
-                cursorVisible ? "bg-current" : "bg-transparent",
-              ].join(" ")}
-              aria-hidden="true"
-            />
-          </span>
-        </motion.p>
-
-        {/* Summary */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className="mt-5 text-pretty text-base leading-relaxed text-muted-foreground"
-        >
-          {summary}
-        </motion.p>
-
-        {/* CTAs */}
         <motion.div
-          initial={{ opacity: 0, y: 6 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.5 }}
-          className="mt-7 flex flex-wrap items-center justify-start gap-3"
+          transition={{ duration: 0.6 }}
+          className="mx-auto max-w-3xl rounded-2xl border bg-card/60 p-6 backdrop-blur-2xl supports-[backdrop-filter]:bg-card/50 sm:p-10 shadow-lg"
+          aria-label="Intro / hero section"
         >
-          {resumeUrl && (
-            <Button asChild size="lg" className="w-min">
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
+            className="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground"
+          >
+            <span className="inline-flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="sr-only">Location:</span>
+              <span>{location}</span>
+            </span>
+          </motion.div>
+
+          {/* Name & Title */}
+          <motion.h1
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.5 }}
+            className="flex flex-row justify-center md:flex-col"
+          >
+            <span className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl self-center md:self-start">
+              {name}
+            </span>
+            <div className="rounded-2xl overflow-hidden md:hidden">
+              <img
+                src="/me.jpeg"
+                alt="Portrait of me"
+                className="rounded-2xl w-40 h-40 md:w-30 md:h-30 object-cover"
+              />
+            </div>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="mt-2 text-xl text-muted-foreground sm:text-2xl"
+            aria-live="polite"
+            aria-atomic="true"
+            aria-hidden="true"
+          >
+            <span className="inline-flex items-center text-balance w-[100%]">
+              {text}
+              <span
+                className={[
+                  "ml-0.5 inline-block h-[1.2em] w-[1px] align-middle",
+                  cursorVisible ? "bg-current" : "bg-transparent",
+                ].join(" ")}
+                aria-hidden="true"
+              />
+            </span>
+          </motion.p>
+
+          {/* Summary */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="mt-5 text-pretty text-base leading-relaxed text-muted-foreground"
+          >
+            {summary}
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.5 }}
+            className="mt-7 flex flex-wrap items-center justify-start gap-3"
+          >
+            <Button
+              asChild
+              size="lg"
+              className="w-min"
+              onClick={() =>
+                window.open(
+                  "/Rhenjiro_October25.pdf",
+                  "_blank",
+                  "noopener,noreferrer"
+                )
+              }
+            >
               <a
-                href={resumeUrl}
                 target="_blank"
                 rel="noreferrer noopener"
                 aria-label="Open resume"
@@ -153,36 +171,36 @@ export default function LandingInfo({
                 <ArrowRight className=" h-4 w-4" aria-hidden="true" />
               </a>
             </Button>
+          </motion.div>
+
+          {/* Socials */}
+          {socialItems && socialItems.length > 0 && (
+            <motion.ul
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="mt-6 flex flex-wrap items-center gap-3"
+              aria-label="Social links"
+            >
+              {socialItems &&
+                socialItems.map(({ icon: Icon, href, label }) => (
+                  <li key={label}>
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors hover:-translate-y-1"
+                      aria-label={`Open ${label}`}
+                    >
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                      <span className="hidden md:block">{label}</span>
+                    </a>
+                  </li>
+                ))}
+            </motion.ul>
           )}
         </motion.div>
-
-        {/* Socials */}
-        {socialItems && socialItems.length > 0 && (
-          <motion.ul
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="mt-6 flex flex-wrap items-center gap-3"
-            aria-label="Social links"
-          >
-            {socialItems &&
-              socialItems.map(({ icon: Icon, href, label }) => (
-                <li key={label}>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors hover:-translate-y-1"
-                    aria-label={`Open ${label}`}
-                  >
-                    <Icon className="h-4 w-4" aria-hidden="true" />
-                    <span className="hidden md:block">{label}</span>
-                  </a>
-                </li>
-              ))}
-          </motion.ul>
-        )}
-      </motion.div>
+      </div>
     </section>
   );
 }

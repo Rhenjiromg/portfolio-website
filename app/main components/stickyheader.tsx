@@ -106,7 +106,7 @@ export default function Header() {
               className="block px-4 py-2 text-gray-600 text-3xl hover:bg-gray-100"
               onClick={() => setMenuOpen(false)}
             >
-              Experiences
+              Projects
             </a>
             <a
               href="/projects"

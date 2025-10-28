@@ -143,11 +143,38 @@ export default function Experiences() {
                         </div>
                       </header>
 
-                      {item.summary && (
-                        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                          {item.summary}
-                        </p>
-                      )}
+                      {item.summary &&
+                        (() => {
+                          const raw = item.summary.trim();
+
+                          // split by existing newlines, or (if none) by "- "
+                          let lines = raw.split(/\r?\n/).filter(Boolean);
+                          if (lines.length <= 1) {
+                            const parts = raw.split(/\s*-\s+/).filter(Boolean);
+                            if (parts.length > 1) lines = parts;
+                          }
+
+                          // if we detected bullets, render a list
+                          if (
+                            lines.length > 1 &&
+                            lines.every((l) => /^[-*]/.test(raw) || true)
+                          ) {
+                            return (
+                              <ul className="mt-3 space-y-1 text-sm leading-relaxed text-muted-foreground list-disc pl-5">
+                                {lines.map((l, i) => (
+                                  <li key={i}>{l.replace(/^[-*]\s*/, "")}</li>
+                                ))}
+                              </ul>
+                            );
+                          }
+
+                          // fallback: regular paragraph (also respects any newlines)
+                          return (
+                            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                              {item.summary}
+                            </p>
+                          );
+                        })()}
 
                       {item.tags && item.tags.length > 0 && (
                         <ul className="mt-3 flex flex-wrap items-center gap-2">

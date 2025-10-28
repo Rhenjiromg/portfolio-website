@@ -972,30 +972,58 @@ function NewsForm({
     toISODateOrEmpty(initial?.publishedAt) ||
       toISODateOrEmpty(new Date().toISOString())
   );
+
+  // Cover image (URL or file)
   const [coverImage, setCoverImage] = useState(initial?.coverImage || "");
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [imagesTxt, setImagesTxt] = useState(
-    imagesJsonToTextblock(initial?.images)
+
+  // Secondary images: URLs as rows + optional files
+  const [imagesList, setImagesList] = useState<string[]>(
+    (initial?.images ?? []).map((x) => x.src)
   );
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+
   const [tagsCsv, setTagsCsv] = useState(arrayToCsv(initial?.tags));
   const [url, setUrl] = useState(initial?.url || "");
   const [draft, setDraft] = useState(!!initial?.draft);
   const [pinned, setPinned] = useState(!!initial?.pinned);
   const [saving, setSaving] = useState(false);
 
+  // URL rows helpers
+  const addImageRow = () => setImagesList((arr) => [...arr, ""]);
+  const removeImageRow = (idx: number) =>
+    setImagesList((arr) => arr.filter((_, i) => i !== idx));
+  const updateImageRow = (idx: number, v: string) =>
+    setImagesList((arr) => arr.map((s, i) => (i === idx ? v : s)));
+
+  const buildImagesArray = (id: string) => async () => {
+    // From URL rows
+    let imgs = imagesList
+      .map((src) => src.trim())
+      .filter(Boolean)
+      .map((src) => ({ src, alt: "" as const }));
+
+    // From uploaded files
+    if (imageFiles.length) {
+      const uploaded = await uploadMany(imageFiles, id);
+      imgs = [...imgs, ...uploaded.map((src) => ({ src, alt: "" as const }))];
+    }
+    return imgs;
+  };
+
   const save = async () => {
     setSaving(true);
     try {
       if (initial?.id) {
         const id = initial.id;
+
+        // Cover
         let coverUrl = coverImage;
         if (coverFile) coverUrl = await uploadOne(coverFile, id);
-        let imgs = textblockToImagesJson(imagesTxt);
-        if (imageFiles.length) {
-          const uploaded = await uploadMany(imageFiles, id);
-          imgs = [...imgs, ...uploaded.map((src) => ({ src, alt: "" }))];
-        }
+
+        // Secondary imgs
+        const imgs = await buildImagesArray(id)();
+
         const payload: Omit<NewsItem, "id"> = replaceUndefinedWithEmpty({
           title,
           content,
@@ -1008,16 +1036,18 @@ function NewsForm({
           draft,
           pinned,
         });
+
         await updateDocClean(doc(db, "news", id), payload as any);
       } else {
         const id = genId();
+
+        // Cover
         let coverUrl = coverImage;
         if (coverFile) coverUrl = await uploadOne(coverFile, id);
-        let imgs = textblockToImagesJson(imagesTxt);
-        if (imageFiles.length) {
-          const uploaded = await uploadMany(imageFiles, id);
-          imgs = [...imgs, ...uploaded.map((src) => ({ src, alt: "" }))];
-        }
+
+        // Secondary imgs
+        const imgs = await buildImagesArray(id)();
+
         const payload: Omit<NewsItem, "id"> = replaceUndefinedWithEmpty({
           title,
           content,
@@ -1030,11 +1060,13 @@ function NewsForm({
           draft,
           pinned,
         });
+
         await setDocClean(doc(db, "news", id), {
           ...payload,
           createdAt: serverTimestamp(),
         });
       }
+
       onSaved();
     } finally {
       setSaving(false);
@@ -1051,6 +1083,7 @@ function NewsForm({
           onChange={(e) => setTitle(e.target.value)}
         />
       </div>
+
       <div className="grid gap-2">
         <Label htmlFor="n-content">Content</Label>
         <Textarea
@@ -1060,6 +1093,7 @@ function NewsForm({
           onChange={(e) => setContent(e.target.value)}
         />
       </div>
+
       <div className="grid gap-2 sm:grid-cols-2">
         <div>
           <Label htmlFor="n-date">Published date</Label>
@@ -1070,6 +1104,7 @@ function NewsForm({
             onChange={(e) => setPublishedAt(e.target.value)}
           />
         </div>
+
         <div>
           <Label htmlFor="n-cover">Cover image URL (or upload below)</Label>
           <Input
@@ -1089,25 +1124,55 @@ function NewsForm({
           </p>
         </div>
       </div>
+
+      {/* Secondary images */}
       <div className="grid gap-2">
-        <Label htmlFor="n-images">
-          Additional images (one per line, optional ` | alt`) or upload below
-        </Label>
-        <Textarea
-          id="n-images"
-          rows={4}
-          value={imagesTxt}
-          onChange={(e) => setImagesTxt(e.target.value)}
-          placeholder="https://... | optional alt
-https://..."
-        />
-        <Input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
-        />
+        <Label>Secondary images</Label>
+
+        {/* URL rows */}
+        <div className="space-y-2">
+          {imagesList.map((val, idx) => (
+            <div className="flex gap-2" key={idx}>
+              <Input
+                placeholder="https://example.com/image.jpg"
+                value={val}
+                onChange={(e) => updateImageRow(idx, e.target.value)}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => removeImageRow(idx)}
+              >
+                Remove
+              </Button>
+            </div>
+          ))}
+          <Button type="button" variant="secondary" onClick={addImageRow}>
+            + Add image URL
+          </Button>
+        </div>
+
+        {/* OR upload multiple files */}
+        <div className="pt-2">
+          <Label htmlFor="n-images-upload" className="text-xs">
+            Or upload one or more files
+          </Label>
+          <Input
+            id="n-images-upload"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
+          />
+          {imageFiles.length > 0 && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {imageFiles.length} file{imageFiles.length > 1 ? "s" : ""}{" "}
+              selected – uploaded on save
+            </p>
+          )}
+        </div>
       </div>
+
       <div className="grid gap-2">
         <Label htmlFor="n-tags">Tags (comma-separated)</Label>
         <Input
@@ -1116,6 +1181,7 @@ https://..."
           onChange={(e) => setTagsCsv(e.target.value)}
         />
       </div>
+
       <div className="grid gap-2">
         <Label htmlFor="n-url">Link URL (optional)</Label>
         <Input
@@ -1124,6 +1190,7 @@ https://..."
           onChange={(e) => setUrl(e.target.value)}
         />
       </div>
+
       <div className="grid gap-2 sm:grid-cols-2">
         <div className="flex items-center gap-2">
           <Checkbox
@@ -1142,6 +1209,7 @@ https://..."
           <Label htmlFor="n-pin">Pinned</Label>
         </div>
       </div>
+
       <DialogFooter className="gap-2">
         <Button variant="outline" onClick={onCancel}>
           <X className="mr-2 h-4 w-4" />

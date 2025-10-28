@@ -6,6 +6,7 @@ import LandingInfo from "./main components/landing";
 import StickyHeader from "./main components/stickyheader";
 import News from "./main components/news";
 import Projects from "./main components/projects";
+import ContactMe from "./main components/contactme";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <LandingInfo />
       <News />
       <Projects />
+      <ContactMe />
     </div>
   );
 }

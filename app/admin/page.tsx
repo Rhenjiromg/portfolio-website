@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db, storage } from "@/app/utils/firebase"; // Firestore + Storage
@@ -13,6 +13,9 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  getDocs,
+  Timestamp,
+  where,
 } from "firebase/firestore";
 import {
   getDownloadURL,
@@ -33,48 +36,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-// ===== Types =====
-export interface ProjectItem {
-  id: string;
-  title: string;
-  description: string;
-  coverImage?: string;
-  tags?: string[];
-  starred?: boolean;
-  pinned?: boolean;
-  repoUrl?: string;
-  liveUrl?: string;
-  updatedAt?: string;
-}
-
-export interface NewsItem {
-  id: string;
-  title: string;
-  content: string;
-  publishedAt: string;
-  updatedAt?: string;
-  coverImage?: string;
-  images?: { src: string; alt?: string }[];
-  tags?: string[];
-  url?: string;
-  draft?: boolean;
-  pinned?: boolean;
-}
-
-export interface ExperienceItem {
-  id: string;
-  company: string;
-  role: string;
-  startDate: string;
-  endDate?: string;
-  location?: string;
-  summary?: string;
-  logo?: string;
-  tags?: string[];
-  url?: string;
-  images?: string[];
-}
+import { ProjectItem } from "../types/project";
+import { NewsItem } from "../types/news";
+import { ExperienceItem } from "../types/experience";
 
 // ===== Helpers =====
 const csvToArray = (v?: string) =>
@@ -162,9 +126,9 @@ async function updateDocClean(ref: any, data: any) {
 export default function AdminDashboard() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
-  const [tab, setTab] = useState<"PROJECTS" | "EXPERIENCES" | "NEWS">(
-    "PROJECTS"
-  );
+  const [tab, setTab] = useState<
+    "PROJECTS" | "EXPERIENCES" | "NEWS" | "MESSAGES"
+  >("PROJECTS");
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -220,11 +184,19 @@ export default function AdminDashboard() {
           >
             News
           </Button>
+          <Button
+            variant={tab === "MESSAGES" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setTab("MESSAGES")}
+          >
+            Messages
+          </Button>
         </div>
 
         {tab === "PROJECTS" && <ProjectsList />}
         {tab === "EXPERIENCES" && <ExperiencesList />}
         {tab === "NEWS" && <NewsList />}
+        {tab === "MESSAGES" && <MessagesList />}
       </div>
     </section>
   );
@@ -1219,6 +1191,405 @@ function NewsForm({
           {saving ? "Saving…" : "Save"}
         </Button>
       </DialogFooter>
+    </div>
+  );
+}
+
+import {
+  Mail,
+  Copy,
+  ChevronDown,
+  ChevronUp,
+  Star,
+  StarOff,
+  CheckCircle2,
+  RotateCcw,
+} from "lucide-react";
+import { MessageItem } from "../types/messages";
+
+type TabKey = "unread" | "read" | "starred" | "trash";
+
+function toDate(val?: MessageItem["createdAt"]): Date | null {
+  if (!val) return null;
+  if (val instanceof Timestamp) return val.toDate();
+  if (typeof val === "string") {
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  if (typeof (val as any).seconds === "number") {
+    const s =
+      (val as any).seconds * 1000 + Math.floor((val as any).nanoseconds / 1e6);
+    return new Date(s);
+  }
+  return null;
+}
+
+function formatDate(d: Date | null) {
+  if (!d) return "";
+  return d.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+function MessagesList() {
+  const [messages, setMessages] = useState<MessageItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState<TabKey>("unread");
+
+  // Subscribe based on active tab
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true);
+
+    const base = collection(db, "messages");
+    const constraints = [
+      orderBy("createdAt", "desc"),
+      ...(activeTab === "trash"
+        ? [where("deleted", "==", true)]
+        : [where("deleted", "==", false)]),
+      ...(activeTab === "unread"
+        ? [where("read", "==", false)]
+        : activeTab === "read"
+        ? [where("read", "==", true)]
+        : activeTab === "starred"
+        ? [where("starred", "==", true)]
+        : []),
+    ];
+
+    const qy = query(base, ...constraints);
+    const unsub = onSnapshot(
+      qy,
+      (snap) => {
+        const next: MessageItem[] = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as Omit<MessageItem, "id">),
+        }));
+        setMessages(next);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Messages subscribe error:", err);
+        setLoading(false);
+      }
+    );
+
+    return () => unsub();
+  }, [activeTab]);
+
+  // Local search
+  const filtered = useMemo(() => {
+    const t = search.trim().toLowerCase();
+    if (!t) return messages;
+    return messages.filter(
+      (m) =>
+        m.email?.toLowerCase().includes(t) ||
+        m.content?.toLowerCase().includes(t)
+    );
+  }, [messages, search]);
+
+  // Actions
+  const toggle = (id: string) => setExpanded((s) => ({ ...s, [id]: !s[id] }));
+
+  const copy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      console.error("Clipboard error:", e);
+    }
+  };
+
+  const markRead = async (id: string) => {
+    try {
+      await updateDoc(doc(db, "messages", id), { read: true });
+    } catch (e) {
+      console.error("markRead error:", e);
+    }
+  };
+
+  const toggleStar = async (id: string, current?: boolean) => {
+    try {
+      await updateDoc(doc(db, "messages", id), { starred: !current });
+    } catch (e) {
+      console.error("toggleStar error:", e);
+    }
+  };
+
+  // Soft delete → moves to Trash
+  const softDelete = async (id: string) => {
+    try {
+      await updateDoc(doc(db, "messages", id), {
+        deleted: true,
+        deletedAt: serverTimestamp(),
+      });
+    } catch (e) {
+      console.error("softDelete error:", e);
+    }
+  };
+
+  // Restore from Trash
+  const restore = async (id: string) => {
+    try {
+      await updateDoc(doc(db, "messages", id), {
+        deleted: false,
+        deletedAt: null,
+      });
+    } catch (e) {
+      console.error("restore error:", e);
+    }
+  };
+
+  // Permanently delete
+  const hardDelete = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "messages", id));
+    } catch (e) {
+      console.error("hardDelete error:", e);
+    }
+  };
+
+  // UI helpers
+  const TabButton = ({ tab, label }: { tab: TabKey; label: string }) => (
+    <button
+      type="button"
+      onClick={() => setActiveTab(tab)}
+      className={`rounded-full px-4 py-1.5 text-sm font-medium transition-opacity ${
+        activeTab === tab ? "opacity-100" : "opacity-70 hover:opacity-100"
+      }`}
+      style={{
+        backgroundColor: activeTab === tab ? "#bcb29e" : "transparent",
+        border: activeTab === tab ? "none" : "1px solid rgba(188,178,158,0.6)",
+        color: "#1f1f1f",
+      }}
+    >
+      {label}
+    </button>
+  );
+
+  if (loading) {
+    return (
+      <div className="mx-auto w-full max-w-3xl p-6">
+        <div
+          className="mb-4 h-10 w-full animate-pulse rounded"
+          style={{ backgroundColor: "rgba(188,178,158,0.35)" }}
+        />
+        <div className="space-y-3">
+          <div
+            className="h-20 w-full animate-pulse rounded"
+            style={{ backgroundColor: "rgba(188,178,158,0.35)" }}
+          />
+          <div
+            className="h-20 w-full animate-pulse rounded"
+            style={{ backgroundColor: "rgba(188,178,158,0.35)" }}
+          />
+          <div
+            className="h-20 w-full animate-pulse rounded"
+            style={{ backgroundColor: "rgba(188,178,158,0.35)" }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto mt-6 w-full max-w-3xl px-4 sm:px-6">
+      {/* Tabs */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <TabButton tab="unread" label="Unread" />
+        <TabButton tab="read" label="Read" />
+        <TabButton tab="starred" label="Starred" />
+        <TabButton tab="trash" label="Trash" />
+      </div>
+
+      {/* Search */}
+      <div className="mb-4">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by email or message…"
+          className="w-full rounded-md border border-black/10 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-black/20"
+        />
+      </div>
+
+      {/* Empty */}
+      {filtered.length === 0 ? (
+        <div
+          className="rounded-2xl p-6 text-center"
+          style={{
+            backgroundColor: "#fdf0d5",
+            boxShadow: "0 1px 2px rgba(188,178,158,0.25)",
+            borderColor: "rgba(188,178,158,0.35)",
+            borderWidth: 1,
+          }}
+        >
+          <p className="text-sm" style={{ color: "#6b5f49" }}>
+            No messages found.
+          </p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {filtered.map((m) => {
+            const d = toDate(m.createdAt);
+            const isOpen = !!expanded[m.id];
+            const preview =
+              m.content.length > 180 && !isOpen
+                ? m.content.slice(0, 180) + "…"
+                : m.content;
+
+            return (
+              <li
+                key={m.id}
+                className="rounded-2xl p-4"
+                style={{
+                  backgroundColor: "#fdf0d5",
+                  boxShadow: "0 1px 2px rgba(188,178,158,0.25)",
+                  borderColor: "rgba(188,178,158,0.35)",
+                  borderWidth: 1,
+                }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <a
+                        href={`mailto:${m.email}`}
+                        className="inline-flex items-center gap-1 hover:underline"
+                        style={{ color: "#bcb29e" }}
+                        title={`Email ${m.email}`}
+                      >
+                        <Mail className="h-4 w-4" />
+                        <span className="truncate">{m.email}</span>
+                      </a>
+                      <button
+                        onClick={() => copy(m.email)}
+                        className="rounded-full border border-black/10 px-2 py-1 text-xs hover:bg-black/5"
+                        title="Copy email"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+
+                      {/* Date */}
+                      <span className="text-xs" style={{ color: "#6b5f49" }}>
+                        {formatDate(d)}
+                      </span>
+                    </div>
+
+                    {/* Content */}
+                    <p
+                      className="mt-2 whitespace-pre-wrap"
+                      style={{ color: "#1f1f1f" }}
+                    >
+                      {preview}
+                    </p>
+                  </div>
+
+                  {/* Right-side actions */}
+                  <div className="flex shrink-0 flex-col items-end gap-2">
+                    {/* Star toggle (not shown in Trash? You can allow it if you prefer) */}
+                    {activeTab !== "trash" && (
+                      <button
+                        onClick={() => toggleStar(m.id, m.starred)}
+                        className="rounded-full border border-black/10 px-2 py-1 text-xs hover:bg-black/5"
+                        title={m.starred ? "Unstar" : "Star"}
+                      >
+                        {m.starred ? (
+                          <Star
+                            className="h-4 w-4"
+                            fill="#bcb29e"
+                            color="#bcb29e"
+                          />
+                        ) : (
+                          <StarOff className="h-4 w-4" />
+                        )}
+                      </button>
+                    )}
+
+                    {/* Mark read (only in Unread) */}
+                    {activeTab === "unread" && (
+                      <button
+                        onClick={() => markRead(m.id)}
+                        className="rounded-full border border-black/10 px-2 py-1 text-xs hover:bg-black/5"
+                        title="Mark as read"
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                      </button>
+                    )}
+
+                    {/* Soft delete (move to Trash) */}
+                    {activeTab !== "trash" && (
+                      <button
+                        onClick={() => softDelete(m.id)}
+                        className="rounded-full border border-black/10 px-2 py-1 text-xs hover:bg-black/5"
+                        title="Delete (move to Trash)"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+
+                    {/* Trash-only actions */}
+                    {activeTab === "trash" && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => restore(m.id)}
+                          className="rounded-full border border-black/10 px-2 py-1 text-xs hover:bg-black/5"
+                          title="Restore"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => hardDelete(m.id)}
+                          className="rounded-full border border-black/10 px-2 py-1 text-xs hover:bg-black/5"
+                          title="Delete permanently"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Expand / collapse for long content */}
+                    {m.content.length > 180 && (
+                      <button
+                        onClick={() => toggle(m.id)}
+                        className="rounded-full px-3 py-1 text-xs font-medium"
+                        style={{ backgroundColor: "#bcb29e" }}
+                        aria-expanded={isOpen}
+                        aria-controls={`msg-${m.id}`}
+                      >
+                        <span className="inline-flex items-center gap-1">
+                          {isOpen ? (
+                            <>
+                              Show less <ChevronUp className="h-4 w-4" />
+                            </>
+                          ) : (
+                            <>
+                              Read more <ChevronDown className="h-4 w-4" />
+                            </>
+                          )}
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Full content when expanded */}
+                {m.content.length > 180 && isOpen && (
+                  <div id={`msg-${m.id}`} className="mt-2">
+                    <p
+                      className="whitespace-pre-wrap"
+                      style={{ color: "#1f1f1f" }}
+                    >
+                      {m.content}
+                    </p>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

@@ -37,30 +37,33 @@ export default function Header() {
         <div></div>
 
         <nav className="hidden md:flex space-x-6">
-          <a href="/" className="hover:text-white hover:cursor-pointer">
+          <a
+            href="/"
+            className="hover:text-white hover:cursor-pointer hover:underline underline decoration-transparent hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300"
+          >
             Home
           </a>
           <a
             href="/experiences"
-            className="hover:text-white hover:cursor-pointer"
+            className="hover:text-white hover:cursor-pointer hover:underline underline decoration-transparent hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300"
           >
             Experiences
           </a>
           <a
             href="/projects"
-            className=" hover:text-white hover:cursor-pointer"
+            className=" hover:text-white hover:cursor-pointer hover:underline underline decoration-transparent hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300"
           >
             Projects
           </a>
           <a
             href="/education"
-            className=" hover:text-white hover:cursor-pointer"
+            className=" hover:text-white hover:cursor-pointer hover:underline underline decoration-transparent hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300"
           >
             Education
           </a>
           <a
             href="/personal"
-            className=" hover:text-white hover:cursor-pointer"
+            className=" hover:text-white hover:cursor-pointer hover:underline underline decoration-transparent hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300"
           >
             Personal
           </a>
@@ -106,7 +109,7 @@ export default function Header() {
               className="block px-4 py-2 text-gray-600 text-3xl hover:bg-gray-100"
               onClick={() => setMenuOpen(false)}
             >
-              Projects
+              Experiences
             </a>
             <a
               href="/projects"

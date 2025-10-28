@@ -5,7 +5,7 @@ import {
   query,
   QueryDocumentSnapshot,
 } from "firebase/firestore";
-import { ExperienceItem } from "../admin/page";
+import { ExperienceItem } from "../types/experience";
 import { NewsItem } from "../types/news";
 import { ProjectItem } from "../types/project";
 import { db } from "./firebase";

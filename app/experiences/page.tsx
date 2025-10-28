@@ -1,7 +1,7 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, MapPin, ExternalLink } from "lucide-react";
+import { Calendar, MapPin, ExternalLink, Loader2 } from "lucide-react";
 import { ExperienceItem } from "../types/experience";
 import Header from "../main components/stickyheader";
 import { getExperiences } from "../utils/info";
@@ -12,16 +12,20 @@ function fmtRange(start: string, end?: string) {
 export default function Experiences() {
   const title = "Experiences";
   const [items, setItems] = useState<ExperienceItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   useEffect(() => {
     let isMounted = true;
 
     (async () => {
+      setIsLoading(true);
       try {
         const res = await getExperiences();
         if (isMounted) setItems(res);
       } catch (e) {
         console.error("getProjects failed", e);
         if (isMounted) setItems([]);
+      } finally {
+        setIsLoading(false);
       }
     })();
 
@@ -29,6 +33,13 @@ export default function Experiences() {
       isMounted = false;
     };
   }, []);
+  if (isLoading) {
+    return (
+      <div className="flex w-full px-6 py-12 sm:px-10 bg-[#fdf0d5] min-h-screen justify-center align-center">
+        <Loader2 className="self-center animate-spin" />
+      </div>
+    );
+  }
   return (
     <div>
       <Header />

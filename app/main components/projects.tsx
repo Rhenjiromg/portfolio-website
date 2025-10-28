@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, ExternalLink, Github, Pin, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProjectItem } from "../types/project";
+import { getProjects } from "../utils/info";
 
 function sortProjects(items: ProjectItem[]): ProjectItem[] {
   const byDate = (a: ProjectItem, b: ProjectItem) =>
@@ -18,23 +19,38 @@ function fallback(src?: string) {
 }
 
 export default function Projects({
-  items = [],
-  title = "Selected Projects",
+  title = "Projects",
   ctaHref = "/projects",
   maxDesktop = 6,
 }: {
-  items?: ProjectItem[];
   title?: string;
   ctaHref?: string;
   maxDesktop?: number;
 }) {
+  const [items, setItems] = useState<ProjectItem[]>([]);
+  useEffect(() => {
+    let isMounted = true;
+
+    (async () => {
+      try {
+        const res = await getProjects();
+        if (isMounted) setItems(res);
+      } catch (e) {
+        console.error("getProjects failed", e);
+        if (isMounted) setItems([]);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   const ordered = sortProjects(items);
   const topForDesktop = ordered.slice(0, Math.max(3, maxDesktop));
   const topForMobile = ordered.slice(0, 2);
 
   return (
     <section className="relative flex w-full items-center justify-center overflow-hidden px-6 py-12 sm:px-10">
-      {/* Background (matches Landing/News look) */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
         <motion.div
@@ -74,6 +90,7 @@ export default function Projects({
               variant="outline"
               size="sm"
               aria-label="See more projects"
+              className="bg-[]"
             >
               <Link href={ctaHref}>
                 See more
@@ -152,7 +169,7 @@ function ProjectCard({ item }: { item: ProjectItem }) {
 
         <h3 className="text-lg font-semibold">
           <Link
-            href={`/projects/${item.slug}`}
+            href={`/projects/${item.id}`}
             className="after:absolute after:inset-0"
           >
             {item.title}
@@ -183,7 +200,12 @@ function ProjectCard({ item }: { item: ProjectItem }) {
             </Button>
           )}
           {item.repoUrl && (
-            <Button asChild size="sm" variant="outline" className="group/btn">
+            <Button
+              asChild
+              size="sm"
+              variant="outline"
+              className="group/btn bg-[]"
+            >
               <Link
                 href={item.repoUrl}
                 target="_blank"
@@ -215,7 +237,6 @@ function EmptyProjects() {
   );
 }
 
-// Optional: full list page renderer
 export function AllProjectsList({
   items = [],
   title = "All Projects",

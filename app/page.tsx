@@ -9,7 +9,7 @@ import Projects from "./main components/projects";
 
 export default function Home() {
   return (
-    <div className="min-h-screen min-w-screen overflow-y-hidden overflow-x-auto text-black bg-[#fdf0d5]">
+    <div className="min-h-screen min-w-screen overflow-y-hidden overflow-x-auto text-black bg-[#fdf0d5] gap-y-3 relative">
       <StickyHeader />
       <LandingInfo />
       <News />

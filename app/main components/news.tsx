@@ -56,7 +56,7 @@ export default function News({
   const topForMobile = ordered.slice(0, 1);
 
   return (
-    <section className="relative flex min-h-[92vh] w-full items-center justify-center overflow-hidden px-6 py-12 sm:px-10">
+    <section className="relative flex h-min w-full mt-24 overflow-hidden px-6 py-12 sm:px-10">
       {/* Background (mirrors LandingInfo look) */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
@@ -173,7 +173,7 @@ function NewsCard({
 
         <h3 className="line-clamp-2 text-lg font-semibold">
           <Link
-            href={`/news/${item.slug}`}
+            href={`/news/${item.id}`}
             className="after:absolute after:inset-0"
           >
             {item.title}

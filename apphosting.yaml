@@ -1,0 +1,13 @@
+env:
+  - variable: API_KEY
+    secret: API_KEY
+  - variable: AUTH_DOMAIN
+    secret: AUTH_DOMAIN
+  - variable: PROJECT_ID
+    secret: PROJECT_ID
+  - variable: STORAGE_BUCKET
+    secret: STORAGE_BUCKET
+  - variable: MESSAGING_SENDER_ID
+    secret: MESSAGING_SENDER_ID
+  - variable: APP_ID
+    secret: APP_ID

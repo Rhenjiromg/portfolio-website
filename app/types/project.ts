@@ -1,6 +1,5 @@
 export interface ProjectItem {
   id: string;
-  slug: string; // route to /projects/[slug]
   title: string;
   description: string;
   coverImage?: string;

@@ -11,9 +11,16 @@ export default function LandingInfo({
   resumeUrl = "#",
   email = "",
   socialItems = [
-    { icon: Github, label: "GitHub", href: "www.github.com/" },
-    { icon: Linkedin, label: "LinkedIn", href: "#" },
-    { icon: Twitter, label: "Twitter / X", href: "#" },
+    {
+      icon: Github,
+      label: "GitHub",
+      href: "https://www.github.com/rhenjiromg",
+    },
+    {
+      icon: Linkedin,
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/rhenjirog",
+    },
   ],
 }) {
   const { text, cursorVisible } = useTypewriter({
@@ -25,7 +32,7 @@ export default function LandingInfo({
     loop: false,
   });
   return (
-    <section className="relative flex min-h-[92vh] w-full items-center justify-center overflow-hidden px-6 py-12 sm:px-10 flex-col">
+    <section className="relative flex h-min w-full items-center justify-center overflow-hidden px-6 py-3 sm:px-10 flex-col">
       {/* Background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
@@ -69,7 +76,7 @@ export default function LandingInfo({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="mx-auto max-w-3xl rounded-2xl border bg-card/60 p-6 backdrop-blur supports-[backdrop-filter]:bg-card/50 sm:p-10 shadow-lg"
+        className="mx-auto max-w-3xl rounded-2xl border bg-card/60 p-6 backdrop-blur-2xl supports-[backdrop-filter]:bg-card/50 sm:p-10 shadow-lg"
         aria-label="Intro / hero section"
       >
         {/* Eyebrow */}
@@ -82,7 +89,7 @@ export default function LandingInfo({
           <span className="inline-flex items-center gap-1">
             <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
             <span className="sr-only">Location:</span>
-            <span>{location || "Available Worldwide"}</span>
+            <span>{location}</span>
           </span>
         </motion.div>
 
@@ -105,7 +112,6 @@ export default function LandingInfo({
           aria-hidden="true"
         >
           <span className="inline-flex items-center text-balance">
-            {/* Visually typed text */}
             {text}
             <span
               className={[

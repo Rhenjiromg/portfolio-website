@@ -26,11 +26,17 @@ export default function ContactMe() {
     setStatus(null);
 
     if (!validateEmail(email)) {
-      setStatus({ type: "error", msg: "Please enter a valid email address." });
+      setStatus({
+        type: "error",
+        msg: "Please put in your email so I can contact you!",
+      });
       return;
     }
     if (!content.trim()) {
-      setStatus({ type: "error", msg: "Please enter a message." });
+      setStatus({
+        type: "error",
+        msg: "Please enter a message so I can contact you!.",
+      });
       return;
     }
 
@@ -49,7 +55,7 @@ export default function ContactMe() {
       setContent("");
       setStatus({
         type: "success",
-        msg: "Thanks! Your message has been sent.",
+        msg: "Thanks! I have received your message. I will email you as soon as I can!",
       });
     } catch (error) {
       console.error(error);
@@ -69,7 +75,7 @@ export default function ContactMe() {
       {/* Email */}
       <div className="flex flex-col gap-2">
         <label htmlFor="email" className="text-sm font-medium">
-          Email
+          Enter an email I can message
         </label>
         <input
           id="email"
@@ -77,7 +83,7 @@ export default function ContactMe() {
           inputMode="email"
           autoComplete="email"
           className="w-full rounded-md border border-black/10 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-black/20"
-          placeholder="you@example.com"
+          placeholder="johndoe@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={submitting}
@@ -87,13 +93,13 @@ export default function ContactMe() {
       {/* Message */}
       <div className="flex flex-col gap-2">
         <label htmlFor="message" className="text-sm font-medium">
-          Message
+          And a message for me
         </label>
         <textarea
           id="message"
           rows={6}
           className="w-full rounded-md border border-black/10 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-black/20"
-          placeholder="How can I help?"
+          placeholder="Hey Rhenji..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
           disabled={submitting}

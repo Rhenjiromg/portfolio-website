@@ -3,13 +3,12 @@ import { motion } from "framer-motion";
 import { MapPin, ArrowRight, Github, Linkedin, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTypewriter } from "../components/typedWriting";
-export default function LandingInfo({
-  name = "Rhenjiro M. Gunawan",
-  title = "Software Engineer",
-  summary = "I craft performant, delightful apps with modern web technologies. Open to impactful opportunities and collaborations.",
-  location = "Hayward, CA",
-  email = "",
-  socialItems = [
+export default function LandingInfo() {
+  const name = "Rhenjiro M. Gunawan";
+  const summary =
+    "I craft performant, delightful apps with modern web technologies. Open to impactful opportunities and collaborations.";
+  const location = "Hayward, CA";
+  const socialItems = [
     {
       icon: Github,
       label: "GitHub",
@@ -20,8 +19,7 @@ export default function LandingInfo({
       label: "LinkedIn",
       href: "https://www.linkedin.com/in/rhenjirog",
     },
-  ],
-}) {
+  ];
   const { text, cursorVisible } = useTypewriter({
     words: ["Tech Enthusiast", "Hobbyist", "Software Developer"],
     typingSpeed: 70,

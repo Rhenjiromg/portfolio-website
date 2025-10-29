@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages */
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
@@ -30,9 +31,9 @@ export default function Header() {
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-50 backdrop-blur-md shadow-md select-none bg-[#bcb29e]"
+      className="sticky top-0 z-50 backdrop-blur-md shadow-md select-none bg-black"
     >
-      <div className="mx-auto flex items-center justify-between px-8 py-3 text-black font-semibold text-xl">
+      <div className="mx-auto flex items-center justify-between px-8 py-3 text-white font-semibold text-xl">
         {/* Desktop Nav (left placeholder kept as in your code) */}
         <div></div>
 
@@ -75,7 +76,11 @@ export default function Header() {
           onClick={() => setMenuOpen((v) => !v)}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
         >
-          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          {menuOpen ? (
+            <X size={24} className="text-white" />
+          ) : (
+            <Menu size={24} className="text-white" />
+          )}
         </button>
       </div>
 
@@ -84,7 +89,7 @@ export default function Header() {
         {menuOpen && (
           <motion.nav
             key="mobile-menu"
-            className="md:hidden backdrop-blur bg-[#bcb29e] border-gray-200 shadow-2xl h-screen items-center flex flex-col"
+            className="md:hidden backdrop-blur bg-[black] border-gray-200 shadow-2xl h-screen items-center flex flex-col text-white"
             style={{
               position: "fixed",
               left: 0,
@@ -99,35 +104,35 @@ export default function Header() {
           >
             <a
               href="/"
-              className="block px-4 py-2 text-gray-600 text-3xl hover:bg-gray-100 mt-[60%]"
+              className="block px-4 py-2 text-3xl hover:bg-gray-100 mt-[60%]"
               onClick={() => setMenuOpen(false)}
             >
               Home
             </a>
             <a
               href="/experiences"
-              className="block px-4 py-2 text-gray-600 text-3xl hover:bg-gray-100"
+              className="block px-4 py-2  text-3xl hover:bg-gray-100"
               onClick={() => setMenuOpen(false)}
             >
               Experiences
             </a>
             <a
               href="/projects"
-              className="block px-4 py-2 text-gray-600 text-3xl hover:bg-gray-100"
+              className="block px-4 py-2  text-3xl hover:bg-gray-100"
               onClick={() => setMenuOpen(false)}
             >
               Projects
             </a>
             <a
               href="/education"
-              className="block px-4 py-2 text-gray-600 text-3xl hover:bg-gray-100"
+              className="block px-4 py-2  text-3xl hover:bg-gray-100"
               onClick={() => setMenuOpen(false)}
             >
               Education
             </a>
             <a
               href="/personal"
-              className="block px-4 py-2 text-gray-600 text-3xl hover:bg-gray-100"
+              className="block px-4 py-2 text-3xl hover:bg-gray-100"
               onClick={() => setMenuOpen(false)}
             >
               Personal

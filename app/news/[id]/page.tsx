@@ -37,7 +37,7 @@ const splitIntoParagraphs = (text: string): string[] => {
   const normalized = text.replace(/\r\n?/g, "\n").trim();
   const byBlank = normalized.split(/\n\s*\n/).filter(Boolean);
   if (byBlank.length > 1) return byBlank;
-return normalized.split(/\n/).filter(Boolean);
+  return normalized.split(/\n/).filter(Boolean);
 };
 
 // --------------------------------------
@@ -71,12 +71,12 @@ function ImageCarousel({
   if (!images.length) return null;
 
   return (
-    <div className="relative bg-[#fdf0d5]">
+    <div className="relative bg-[]">
       <div className="overflow-hidden rounded-2xl" ref={emblaRef}>
         <div className="flex">
           {images.map((img, idx) => (
             <div className="min-w-0 flex-[0_0_100%]" key={`${img.src}-${idx}`}>
-              <div className="relative aspect-[16/9] w-full bg-[#fdf0d5]">
+              <div className="relative aspect-[16/9] w-full bg-[]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={img.src}
@@ -420,7 +420,7 @@ export default function Page() {
   if (!item) return null;
 
   return (
-    <div className="bg-[#fdf0d5] min-h-screen">
+    <div className="bg-[] min-h-screen">
       <Header />
       <NewsItemViewer item={item} collapsedLines={8} />
     </div>

@@ -14,6 +14,7 @@ import { Calendar, MapPin, ExternalLink, Loader2 } from "lucide-react";
 import { ExperienceItem } from "../types/experience";
 import Header from "../main components/stickyheader";
 import { getExperiences } from "../utils/info";
+import Chips from "../components/chips";
 
 function fmtRange(start: string, end?: string) {
   return end ? `${start} — ${end}` : `${start} — Present`;
@@ -350,18 +351,7 @@ function CardContent({ item }: { item: ExperienceItem }) {
           );
         })()}
 
-      {item.tags && item.tags.length > 0 && (
-        <ul className="mt-3 flex flex-wrap items-center gap-2">
-          {item.tags.map((t) => (
-            <li
-              key={t}
-              className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground"
-            >
-              {t}
-            </li>
-          ))}
-        </ul>
-      )}
+      {item.tags && item.tags.length > 0 && <Chips chips={item.tags} />}
     </>
   );
 }

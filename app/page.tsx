@@ -41,7 +41,7 @@ export default function Home() {
             animate={{ y: 0 }}
             exit={{ y: "-100%" }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-[9999] bg-[#fdf0d5] flex items-center justify-center"
+            className="fixed inset-0 z-[9999] bg-[black] text-white flex items-center justify-center"
             aria-label="Loading"
             role="status"
           >

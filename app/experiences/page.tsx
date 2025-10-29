@@ -29,7 +29,7 @@ function getYear(d?: string) {
 export default function Experiences() {
   const title = "Experiences";
   const [items, setItems] = useState<ExperienceItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [hasMoreMobile, setHasMoreMobile] = useState(false);
   const [showHint, setShowHint] = useState(false);

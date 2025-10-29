@@ -213,7 +213,7 @@ const ProjectsList = () => {
     const unsub = onSnapshot(qy, (snap) => {
       const next: ProjectItem[] = snap.docs.map((d) => ({
         id: d.id,
-        ...(d.data() as any),
+        ...(d.data() as unknown as Omit<ProjectItem, "id">),
       }));
       setItems(next);
     });

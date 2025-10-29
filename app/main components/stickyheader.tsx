@@ -57,12 +57,6 @@ export default function Header() {
             Projects
           </a>
           <a
-            href="/education"
-            className=" hover:text-white hover:cursor-pointer hover:underline underline decoration-transparent hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300"
-          >
-            Education
-          </a>
-          <a
             href="/personal"
             className=" hover:text-white hover:cursor-pointer hover:underline underline decoration-transparent hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300"
           >
@@ -122,13 +116,6 @@ export default function Header() {
               onClick={() => setMenuOpen(false)}
             >
               Projects
-            </a>
-            <a
-              href="/education"
-              className="block px-4 py-2  text-3xl hover:bg-gray-100"
-              onClick={() => setMenuOpen(false)}
-            >
-              Education
             </a>
             <a
               href="/personal"

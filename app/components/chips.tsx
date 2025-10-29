@@ -10,6 +10,7 @@ import {
   SiNodedotjs,
   SiExpo,
   SiFastapi,
+  SiFirebase,
 } from "@icons-pack/react-simple-icons";
 
 type ChipsProps = {
@@ -65,7 +66,7 @@ function pickIcon(key: string) {
   if (key === "python") return SiPython;
   if (key === "ts" || key === "typescript") return SiTypescript;
   if (key === "js" || key === "javascript") return SiJavascript;
-  if (key === "react" || key === "react native") return SiReact; // RN reuses React logo
+  if (key === "react" || key === "react native") return SiReact;
   if (key === "github") return SiGithub;
   if (key === "postgres" || key === "postgresql" || key === "postgress")
     return SiPostgresql;
@@ -73,6 +74,7 @@ function pickIcon(key: string) {
   if (key === "node js") return SiNodedotjs;
   if (key === "expo") return SiExpo;
   if (key === "fastapi") return SiFastapi;
+  if (key === "firebase") return SiFirebase;
 
   return undefined;
 }

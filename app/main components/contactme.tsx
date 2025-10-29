@@ -63,7 +63,7 @@ export default function ContactMe() {
   };
 
   return (
-    <div className="relative mx-auto mt-24 flex w-full max-w-2xl flex-col gap-6 overflow-hidden px-6 pb-12 sm:px-10">
+    <div className="relative mx-auto mt-24 flex w-full max-w-2xl flex-col gap-3 md:gap-6 overflow-hidden px-6 pb-12 sm:px-10">
       <h2 className="text-2xl font-semibold">Contact Me</h2>
 
       {/* Email */}
@@ -119,18 +119,6 @@ export default function ContactMe() {
           className="rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? "Sending…" : "Send"}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setEmail("");
-            setContent("");
-            setStatus(null);
-          }}
-          disabled={submitting || (!email && !content)}
-          className="rounded-full border border-black/10 px-5 py-2.5 text-sm font-medium hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          Clear
         </button>
       </div>
     </div>

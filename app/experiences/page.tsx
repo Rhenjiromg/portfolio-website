@@ -1,5 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { motion } from "framer-motion";
 import { Calendar, MapPin, ExternalLink, Loader2 } from "lucide-react";
 import { ExperienceItem } from "../types/experience";
@@ -9,216 +15,282 @@ import { getExperiences } from "../utils/info";
 function fmtRange(start: string, end?: string) {
   return end ? `${start} — ${end}` : `${start} — Present`;
 }
+
+function getYear(d?: string) {
+  if (!d) return undefined;
+  const m = /^(\d{4})/.exec(d.trim());
+  return m ? m[1] : undefined;
+}
+
 export default function Experiences() {
   const title = "Experiences";
   const [items, setItems] = useState<ExperienceItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
   useEffect(() => {
     let isMounted = true;
-
     (async () => {
       setIsLoading(true);
       try {
         const res = await getExperiences();
-        if (isMounted) setItems(res);
+        if (isMounted) setItems(res ?? []);
       } catch (e) {
-        console.error("getProjects failed", e);
+        console.error("getExperiences failed", e);
         if (isMounted) setItems([]);
       } finally {
         setIsLoading(false);
       }
     })();
-
     return () => {
       isMounted = false;
     };
   }, []);
-  if (isLoading) {
-    return (
-      <div className="flex w-full px-6 py-12 sm:px-10 bg-[#fdf0d5] min-h-screen justify-center align-center">
-        <Loader2 className="self-center animate-spin" />
-      </div>
+
+  const sorted = useMemo(() => {
+    const toKey = (s?: string) => (s && /(\d{4})/.test(s) ? s : "0000");
+    return [...items].sort((a, b) =>
+      toKey(b.startDate).localeCompare(toKey(a.startDate))
     );
-  }
+  }, [items]);
+
   return (
-    <div>
+    <div className="">
       <Header />
-      <section className="relative w-full px-6 py-12 sm:px-10 bg-[#fdf0d5] min-h-screen">
-        {/* Background (soft blobs like the other sections) */}
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
+      {isLoading && (
+        <div className="flex flex-col justify-center min-h-screen">
+          <Loader2 className="animate-spin self-center justify-self-center" />
         </div>
+      )}
+      {!isLoading && (
+        <section className="relative w-full px-6 py-12 sm:px-10 bg-background min-h-screen">
+          {/* Background */}
+          <div className="pointer-events-none absolute inset-0 -z-10">
+            <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
+          </div>
 
-        <div className="mx-auto w-full max-w-6xl">
-          <motion.h2
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-10 text-balance text-3xl font-semibold tracking-tight sm:text-4xl"
+          <div className="mx-auto w-full max-w-6xl">
+            <motion.h2
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-10 text-balance text-3xl font-semibold tracking-tight sm:text-4xl"
+            >
+              {title}
+            </motion.h2>
+
+            {/* Timeline container */}
+            <div className="relative">
+              {/* Center line (md+) */}
+              <div className="pointer-events-none absolute left-1/2 top-0 hidden h-full -translate-x-1/2 border-l border-border md:block" />
+
+              <ExperienceList sorted={sorted} />
+
+              {sorted.length === 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-2xl border bg-card/60 p-8 text-center text-muted-foreground backdrop-blur supports-[backdrop-filter]:bg-card/50"
+                  role="status"
+                  aria-live="polite"
+                >
+                  No experience to show just yet.
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function ExperienceList({ sorted }: { sorted: ExperienceItem[] }) {
+  return (
+    <ul className="grid grid-cols-1 gap-8 md:gap-12">
+      {sorted.map((item, idx) => {
+        const sideRight = idx % 2 === 0; // md+: alternate
+        const year = getYear(item.startDate);
+        const prevYear = getYear(sorted[idx - 1]?.startDate);
+        const isYearHead = year && year !== prevYear;
+        return (
+          <Row
+            key={item.id}
+            sideRight={sideRight}
+            isYearHead={Boolean(isYearHead)}
+            year={year}
           >
-            {title}
-          </motion.h2>
+            <CardContent item={item} />
+          </Row>
+        );
+      })}
+    </ul>
+  );
+}
 
-          {/* Timeline container */}
-          <div className="relative">
-            {/* Center line (md+) */}
-            <div className="pointer-events-none absolute left-1/2 top-0 hidden h-full -translate-x-1/2 border-l border-border md:block" />
+function Row({
+  children,
+  sideRight,
+  isYearHead,
+  year,
+}: {
+  children: React.ReactNode;
+  sideRight: boolean;
+  isYearHead: boolean;
+  year?: string;
+}) {
+  const liRef = useRef<HTMLLIElement | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const [top, setTop] = useState<number>(0);
 
-            <ul className="grid grid-cols-1 gap-8 md:gap-12">
-              {items.map((item, idx) => (
-                <li key={item.id} className="relative">
-                  {/* Dot on the center line for md+ */}
-                  <div className="absolute left-1/2 top-3 hidden -translate-x-1/2 md:block">
-                    <span className="block h-3.5 w-3.5 rounded-full border-2 border-primary bg-background shadow-sm" />
-                  </div>
+  // Measure card bottom relative to li and place dot there centered at 50%.
+  useLayoutEffect(() => {
+    const measure = () => {
+      const li = liRef.current;
+      const card = cardRef.current;
+      if (!li || !card) return;
+      setTop(card.offsetTop + card.offsetHeight);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (cardRef.current) ro.observe(cardRef.current);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
 
-                  {/* Row wrapper determines side on md+ */}
-                  <div
-                    className={[
-                      "md:grid md:grid-cols-2 md:gap-8",
-                      idx % 2 === 0
-                        ? "md:[&>div:first-child]:col-start-1 md:[&>div:last-child]:col-start-2"
-                        : "md:[&>div:first-child]:col-start-2 md:[&>div:last-child]:col-start-1",
-                    ].join(" ")}
-                  >
-                    {/* spacer on the opposite side (keeps offset from the center) */}
-                    <div className="hidden md:block" />
+  return (
+    <li ref={liRef} className="relative">
+      {/* Dot centered at timeline, mapped to card bottom */}
+      <span
+        className="pointer-events-none absolute hidden my-0 h-3.5 w-3.5 -translate-x-1/2 translate-y-[-50%] rounded-full border-2 border-primary bg-background shadow-sm md:block"
+        style={{ left: "50%", top }}
+        aria-hidden
+      />
 
-                    {/* Card */}
-                    <motion.article
-                      initial={{ opacity: 0, y: 10 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.4 }}
-                      transition={{ duration: 0.45 }}
-                      className="relative rounded-2xl border bg-card/60 p-5 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-card/50"
-                    >
-                      {/* pointer to the center line (md+) */}
-                      <span
-                        className={[
-                          "absolute top-4 hidden h-3 w-3 rotate-45 border-l border-t bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/50 md:block",
-                          idx % 2 === 0 ? "-left-1.5" : "-right-1.5",
-                        ].join(" ")}
-                        aria-hidden
-                      />
+      {/* Row grid */}
+      <div className="md:grid md:grid-cols-2 md:gap-8">
+        {/* Spacer side */}
+        <div
+          className={"hidden md:block " + (sideRight ? "" : "md:order-2")}
+        ></div>
 
-                      <header className="flex items-start gap-3">
-                        {item.logo && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={item.logo}
-                            alt=""
-                            className="h-10 w-10 rounded-lg object-cover"
-                          />
-                        )}
-                        <div className="min-w-0">
-                          <h3 className="text-lg font-semibold leading-tight">
-                            {item.role}
-                            {item.url ? (
-                              <a
-                                href={item.url}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                                className="ml-2 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                                aria-label={`Open ${item.company}`}
-                              >
-                                {item.company}
-                                <ExternalLink
-                                  className="ml-1 h-3.5 w-3.5"
-                                  aria-hidden="true"
-                                />
-                              </a>
-                            ) : (
-                              <span className="ml-2 text-sm text-muted-foreground">
-                                {item.company}
-                              </span>
-                            )}
-                          </h3>
-                          <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                            <span className="inline-flex items-center gap-1">
-                              <Calendar
-                                className="h-3.5 w-3.5"
-                                aria-hidden="true"
-                              />
-                              {fmtRange(item.startDate, item.endDate)}
-                            </span>
-                            {item.location && (
-                              <span className="inline-flex items-center gap-1">
-                                <MapPin
-                                  className="h-3.5 w-3.5"
-                                  aria-hidden="true"
-                                />
-                                {item.location}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </header>
+        {/* Card side */}
+        <div className={sideRight ? "" : "md:order-1"}>
+          {isYearHead && (
+            <div
+              className={
+                (sideRight ? "md:text-left" : "md:text-right") +
+                " hidden md:block mb-2"
+              }
+              aria-hidden
+            >
+              <span className="inline-block rounded-full border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur supports-[backdrop-filter]:bg-card/50">
+                {year}
+              </span>
+            </div>
+          )}
 
-                      {item.summary &&
-                        (() => {
-                          const raw = item.summary.trim();
+          <motion.article
+            ref={cardRef}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.45 }}
+            className="relative rounded-2xl border bg-card/60 p-5 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-card/50"
+          >
+            {children}
+          </motion.article>
+        </div>
+      </div>
+    </li>
+  );
+}
 
-                          // split by existing newlines, or (if none) by "- "
-                          let lines = raw.split(/\r?\n/).filter(Boolean);
-                          if (lines.length <= 1) {
-                            const parts = raw.split(/\s*-\s+/).filter(Boolean);
-                            if (parts.length > 1) lines = parts;
-                          }
-
-                          // if we detected bullets, render a list
-                          if (
-                            lines.length > 1 &&
-                            lines.every((l) => /^[-*]/.test(raw) || true)
-                          ) {
-                            return (
-                              <ul className="mt-3 space-y-1 text-sm leading-relaxed text-muted-foreground list-disc pl-5">
-                                {lines.map((l, i) => (
-                                  <li key={i}>{l.replace(/^[-*]\s*/, "")}</li>
-                                ))}
-                              </ul>
-                            );
-                          }
-
-                          // fallback: regular paragraph (also respects any newlines)
-                          return (
-                            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                              {item.summary}
-                            </p>
-                          );
-                        })()}
-
-                      {item.tags && item.tags.length > 0 && (
-                        <ul className="mt-3 flex flex-wrap items-center gap-2">
-                          {item.tags.map((t) => (
-                            <li
-                              key={t}
-                              className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground"
-                            >
-                              {t}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </motion.article>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            {items.length === 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-2xl border bg-card/60 p-8 text-center text-muted-foreground backdrop-blur supports-[backdrop-filter]:bg-card/50"
-                role="status"
-                aria-live="polite"
+function CardContent({ item }: { item: ExperienceItem }) {
+  return (
+    <>
+      <header className="flex items-start gap-3">
+        {item.logo && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={item.logo}
+            alt=""
+            className="h-10 w-10 rounded-lg object-cover"
+          />
+        )}
+        <div className="min-w-0">
+          <h3 className="text-lg font-semibold leading-tight">
+            {item.role}
+            {item.url ? (
+              <a
+                href={item.url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="ml-2 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+                aria-label={`Open ${item.company}`}
               >
-                No experience to show just yet.
-              </motion.div>
+                {item.company}
+                <ExternalLink className="ml-1 h-3.5 w-3.5" aria-hidden="true" />
+              </a>
+            ) : (
+              <span className="ml-2 text-sm text-muted-foreground">
+                {item.company}
+              </span>
+            )}
+          </h3>
+          <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
+              {fmtRange(item.startDate, item.endDate)}
+            </span>
+            {item.location && (
+              <span className="inline-flex items-center gap-1">
+                <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+                {item.location}
+              </span>
             )}
           </div>
         </div>
-      </section>
-    </div>
+      </header>
+
+      {item.summary &&
+        (() => {
+          const raw = item.summary.trim();
+          let lines = raw.split(/\r?\n/).filter(Boolean);
+          if (lines.length <= 1) {
+            const parts = raw.split(/\s*-\s+/).filter(Boolean);
+            if (parts.length > 1) lines = parts;
+          }
+          if (lines.length > 1) {
+            return (
+              <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-relaxed text-muted-foreground">
+                {lines.map((l, i) => (
+                  <li key={i}>{l.replace(/^[-*]\s*/, "")}</li>
+                ))}
+              </ul>
+            );
+          }
+          return (
+            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+              {item.summary}
+            </p>
+          );
+        })()}
+
+      {item.tags && item.tags.length > 0 && (
+        <ul className="mt-3 flex flex-wrap items-center gap-2">
+          {item.tags.map((t) => (
+            <li
+              key={t}
+              className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground"
+            >
+              {t}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
   );
 }

@@ -31,12 +31,12 @@ export default function LandingInfo({
     loop: false,
   });
   return (
-    <section className="relative flex h-min w-full items-center justify-center overflow-hidden px-6 py-3 sm:px-10 flex-col">
+    <section className="relative flex h-min w-full items-center justify-center overflow-hidden px-6 py-3 sm:px-10 flex-col mt-10 md:mt-0">
       {/* Background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
+        <div className="absolute inset-0 bg-background" />
         <motion.div
-          className="absolute -top-32 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full blur-3xl"
+          className="absolute -top-32 left-1/2 h-96 w-2xl -translate-x-1/2 rounded-full blur-3xl"
           style={{
             background:
               "radial-gradient(60% 60% at 50% 50%, hsl(var(--primary)/0.25) 0%, transparent 70%)",

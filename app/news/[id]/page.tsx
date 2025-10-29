@@ -37,7 +37,7 @@ const splitIntoParagraphs = (text: string): string[] => {
   const normalized = text.replace(/\r\n?/g, "\n").trim();
   const byBlank = normalized.split(/\n\s*\n/).filter(Boolean);
   if (byBlank.length > 1) return byBlank;
-  return normalized.split(/\n/).filter(Boolean);
+return normalized.split(/\n/).filter(Boolean);
 };
 
 // --------------------------------------

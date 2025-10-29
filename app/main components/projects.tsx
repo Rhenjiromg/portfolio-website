@@ -5,6 +5,7 @@ import { ArrowRight, ExternalLink, Github, Pin, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProjectItem } from "../types/project";
 import { getProjects } from "../utils/info";
+import Chips from "../components/chips";
 
 function sortProjects(items: ProjectItem[]): ProjectItem[] {
   const byDate = (a: ProjectItem, b: ProjectItem) =>
@@ -157,14 +158,7 @@ function ProjectCard({ item }: { item: ProjectItem }) {
               <Star className="h-3 w-3" aria-hidden="true" /> Highlight
             </span>
           )}
-          {item.tags?.map((t) => (
-            <span
-              key={t}
-              className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5"
-            >
-              {t}
-            </span>
-          ))}
+          {item.tags && <Chips chips={item.tags} />}
         </div>
 
         <h3 className="text-lg font-semibold">

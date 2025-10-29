@@ -389,15 +389,13 @@ export default function Projects() {
 }
 
 function GridCard({ p }: { p: ProjectItem }) {
-  const langs = ((p as any).languages as string[] | undefined) ?? [];
   const tags = ((p as any).tags as string[] | undefined) ?? [];
   const title = (p as any).title || (p as any).name || "Untitled";
   const desc = (p as any).description || "";
   const repo = (p as any).repoUrl as string | undefined;
   const live = (p as any).liveUrl as string | undefined;
   const cover =
-    ((p as any).coverimage as string | undefined)?.trim() ||
-    "/project_default.png";
+    (p.coverImage as string | undefined)?.trim() || "/project_default.png";
 
   return (
     <motion.article
@@ -426,23 +424,6 @@ function GridCard({ p }: { p: ProjectItem }) {
         </CardHeader>
 
         <CardContent className="p-0 mt-4">
-          {/* Languages */}
-          <div className="mb-3 flex flex-wrap gap-2">
-            {langs.slice(0, 6).map((l) => (
-              <Badge
-                key={l}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                <Tag className="h-3 w-3" /> {l}
-              </Badge>
-            ))}
-            {langs.length > 6 && (
-              <Badge variant="outline">+{langs.length - 6}</Badge>
-            )}
-          </div>
-
-          {/* Tags as chips (match Experience style) */}
           {tags.length > 0 && <Chips chips={tags} />}
 
           <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">

@@ -1,4 +1,7 @@
 "use client";
+import { AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
+
 import React, {
   useEffect,
   useMemo,
@@ -26,6 +29,47 @@ export default function Experiences() {
   const title = "Experiences";
   const [items, setItems] = useState<ExperienceItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const [hasMoreMobile, setHasMoreMobile] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const check = () => {
+      const isMobile = window.innerWidth < 768;
+      if (!isMobile) {
+        setHasMoreMobile(false);
+        setShowHint(false);
+        return;
+      }
+
+      const doc = document.documentElement;
+      const pageHeight = doc.scrollHeight;
+      const viewHeight = window.innerHeight;
+
+      const more = pageHeight > viewHeight + 24;
+      setHasMoreMobile(more);
+
+      const scrolledY = window.scrollY || doc.scrollTop;
+      const nearBottom = scrolledY + viewHeight >= pageHeight - 80;
+
+      setShowHint(more && scrolledY < 200 && !nearBottom);
+    };
+
+    check();
+    const onScroll = () => {
+      requestAnimationFrame(check);
+    };
+    const onResize = () => requestAnimationFrame(check);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [isLoading]);
 
   useEffect(() => {
     let isMounted = true;
@@ -55,6 +99,35 @@ export default function Experiences() {
 
   return (
     <div className="">
+      <AnimatePresence>
+        {!isLoading && hasMoreMobile && showHint && (
+          <motion.div
+            key="mobile-more-hint"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.35 }}
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 md:hidden z-[60] pointer-events-none"
+            aria-hidden
+          >
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="rounded-full border border-border/60 bg-card/70 backdrop-blur px-3 py-2 shadow"
+            >
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <ChevronDown className="h-5 w-5" />
+                <span className="text-xs">Scroll for more</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Header />
       {isLoading && (
         <div className="flex flex-col justify-center min-h-screen">
@@ -142,7 +215,6 @@ function Row({
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [top, setTop] = useState<number>(0);
 
-  // Measure card bottom relative to li and place dot there centered at 50%.
   useLayoutEffect(() => {
     const measure = () => {
       const li = liRef.current;
@@ -162,7 +234,6 @@ function Row({
 
   return (
     <li ref={liRef} className="relative">
-      {/* Dot centered at timeline, mapped to card bottom */}
       <span
         className="pointer-events-none absolute hidden my-0 h-3.5 w-3.5 -translate-x-1/2 translate-y-[-50%] rounded-full border-2 border-primary bg-background shadow-sm md:block"
         style={{ left: "50%", top }}

@@ -229,7 +229,7 @@ export default function Projects() {
         )}
       </AnimatePresence>
 
-      <Header />
+      <Header currentRoute="project" />
 
       {isLoading && (
         <div className="flex flex-col justify-center min-h-screen">
@@ -389,11 +389,11 @@ export default function Projects() {
 }
 
 function GridCard({ p }: { p: ProjectItem }) {
-  const tags = ((p as any).tags as string[] | undefined) ?? [];
-  const title = (p as any).title || (p as any).name || "Untitled";
-  const desc = (p as any).description || "";
-  const repo = (p as any).repoUrl as string | undefined;
-  const live = (p as any).liveUrl as string | undefined;
+  const tags = p.tags ?? [];
+  const title = p.title;
+  const desc = p.description;
+  const repo = p.repoUrl;
+  const live = p.liveUrl;
   const cover =
     (p.coverImage as string | undefined)?.trim() || "/project_default.png";
 
@@ -438,6 +438,14 @@ function GridCard({ p }: { p: ProjectItem }) {
                   <Github className="h-3.5 w-3.5" /> Repo
                 </a>
               )}
+              <a
+                className="inline-flex items-center gap-1 hover:underline"
+                href={`/projects/${p.id}}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Read More |
+              </a>
               {live && (
                 <a
                   className="inline-flex items-center gap-1 hover:underline"

@@ -1,15 +1,17 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, Underline, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
-export default function Header() {
+type HeaderProps = {
+  currentRoute: string;
+};
+export default function Header({ currentRoute }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement | null>(null);
   const [headerH, setHeaderH] = useState<number>(0);
 
-  // Measure header height so the fixed menu sits *under* it
   useEffect(() => {
     const el = headerRef.current;
     const measure = () => setHeaderH(el ? el.offsetHeight : 0);
@@ -17,8 +19,6 @@ export default function Header() {
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, []);
-
-  // Optional: lock scroll behind the menu (doesn't change look)
   useEffect(() => {
     if (!menuOpen) return;
     const prev = document.body.style.overflow;
@@ -33,34 +33,34 @@ export default function Header() {
       ref={headerRef}
       className="sticky top-0 z-50 backdrop-blur-md shadow-md select-none bg-black"
     >
-      <div className="mx-auto flex items-center justify-between px-8 py-3 text-white font-semibold text-xl">
+      <div className="mx-auto flex items-center justify-between px-8 py-3 text-white font-semibold text-lg">
         {/* Desktop Nav (left placeholder kept as in your code) */}
         <div></div>
 
         <nav className="hidden md:flex space-x-6">
           <a
             href="/"
-            className="hover:text-white hover:cursor-pointer hover:underline underline decoration-transparent hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300"
+            className={`hover:text-white hover:cursor-pointer hover:underline hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300 ${
+              currentRoute && currentRoute === "home" ? "underline" : ""
+            }`}
           >
             Home
           </a>
           <a
             href="/experiences"
-            className="hover:text-white hover:cursor-pointer hover:underline underline decoration-transparent hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300"
+            className={`hover:text-white hover:cursor-pointer hover:underline hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300 ${
+              currentRoute && currentRoute === "experience" ? "underline" : ""
+            }`}
           >
             Experiences
           </a>
           <a
             href="/projects"
-            className=" hover:text-white hover:cursor-pointer hover:underline underline decoration-transparent hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300"
+            className={`hover:text-white hover:cursor-pointer hover:underline hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300 ${
+              currentRoute && currentRoute === "project" ? "underline" : ""
+            }`}
           >
             Projects
-          </a>
-          <a
-            href="/personal"
-            className=" hover:text-white hover:cursor-pointer hover:underline underline decoration-transparent hover:decoration-current underline-offset-4 decoration-2 transition-colors duration-300"
-          >
-            Personal
           </a>
         </nav>
 
@@ -78,7 +78,6 @@ export default function Header() {
         </button>
       </div>
 
-      {/* Mobile Menu (fixed overlay, same styling as your original) */}
       <AnimatePresence>
         {menuOpen && (
           <motion.nav
@@ -88,7 +87,7 @@ export default function Header() {
               position: "fixed",
               left: 0,
               right: 0,
-              top: headerH, // sits directly under the header
+              top: headerH,
               zIndex: 50,
             }}
             initial={{ y: -8, opacity: 0 }}
@@ -116,13 +115,6 @@ export default function Header() {
               onClick={() => setMenuOpen(false)}
             >
               Projects
-            </a>
-            <a
-              href="/personal"
-              className="block px-4 py-2 text-3xl hover:bg-gray-100"
-              onClick={() => setMenuOpen(false)}
-            >
-              Personal
             </a>
           </motion.nav>
         )}

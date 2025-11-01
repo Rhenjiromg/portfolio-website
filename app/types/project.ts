@@ -1,7 +1,12 @@
 export interface ProjectItem {
   id: string;
   title: string;
-  description: string;
+  description: string; // short description
+  content: string; // /projects/id intro paragraph
+  additionalInfo: {
+    title: string;
+    answer: string;
+  }[]; // collapsible information (title => answer)
   coverImage?: string;
   tags?: string[];
   starred?: boolean; // personal highlight

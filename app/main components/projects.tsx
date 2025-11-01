@@ -16,7 +16,14 @@ function sortProjects(items: ProjectItem[]): ProjectItem[] {
 }
 
 function fallback(src?: string) {
-  return src || "/placeholder/cover.png"; // ensure you have a placeholder or change this
+  return src || "/project_default.png";
+}
+
+function normalizeUrl(url?: string) {
+  if (!url) return "#";
+  // Add protocol if missing, but don't touch mailto:, tel:, etc.
+  if (/^(https?:)?\/\//i.test(url) || /^[a-zA-Z]+:/.test(url)) return url;
+  return `https://${url}`;
 }
 
 export default function Projects({
@@ -51,7 +58,7 @@ export default function Projects({
   const topForMobile = ordered.slice(0, 2);
 
   return (
-    <section className="relative flex w-full items-center justify-center overflow-hidden px-6 py-12 sm:px-10">
+    <section className="relative flex w-full items-center justify-center overflow-hidden px-6 py-6 sm:px-10">
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
         <motion.div
@@ -80,9 +87,9 @@ export default function Projects({
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-6 flex items-center justify-between gap-4"
+          className="mb-6 flex items-center justify-between gap-4 flex-col"
         >
-          <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl self-center">
             {title}
           </h2>
           {ordered.length > topForDesktop.length && (
@@ -134,17 +141,14 @@ function ProjectCard({ item }: { item: ProjectItem }) {
       transition={{ duration: 0.45 }}
       className="group relative overflow-hidden rounded-2xl border bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/50 shadow-lg"
     >
-      {item.coverImage && (
-        <div className="relative aspect-[16/9] w-full">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={fallback(item.coverImage)}
-            alt=""
-            className="h-full w-full object-cover"
-          />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-background/10 to-transparent" />
-        </div>
-      )}
+      <div className="relative aspect-[16/9] w-full">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={fallback(item.coverImage)}
+          alt={item.title || "Project cover"}
+          className="h-full w-full object-cover"
+        />
+      </div>
 
       <div className="p-5">
         <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -160,29 +164,26 @@ function ProjectCard({ item }: { item: ProjectItem }) {
           )}
           {item.tags && <Chips chips={item.tags} />}
         </div>
-
         <h3 className="text-lg font-semibold">
-          <Link
-            href={`/projects/${item.id}`}
-            className="after:absolute after:inset-0"
-          >
-            {item.title}
-          </Link>
+          <span className="">{item.title}</span>{" "}
         </h3>
-
         {item.description && (
           <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
-            {item.description}
+            {" "}
+            {item.description}{" "}
           </p>
         )}
-
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {item.liveUrl && (
-            <Button asChild size="sm" variant="default" className="group/btn">
-              <Link
-                href={item.liveUrl}
+            <Button
+              asChild
+              size="sm"
+              /* removed variant=default to keep default */ className="group/btn"
+            >
+              <a
+                href={normalizeUrl(item.liveUrl)}
                 target="_blank"
-                rel="noreferrer noopener"
+                rel="noopener noreferrer"
                 aria-label={`Open ${item.title} live`}
               >
                 Live demo
@@ -190,25 +191,21 @@ function ProjectCard({ item }: { item: ProjectItem }) {
                   className="ml-1.5 h-4 w-4 transition-transform group-hover/btn:translate-x-0.5"
                   aria-hidden="true"
                 />
-              </Link>
+              </a>
             </Button>
           )}
+
           {item.repoUrl && (
-            <Button
-              asChild
-              size="sm"
-              variant="outline"
-              className="group/btn bg-[]"
-            >
-              <Link
-                href={item.repoUrl}
+            <Button asChild size="sm" variant="outline">
+              <a
+                href={normalizeUrl(item.repoUrl)}
                 target="_blank"
-                rel="noreferrer noopener"
+                rel="noopener noreferrer"
                 aria-label={`Open ${item.title} repo`}
               >
                 <Github className="mr-1.5 h-4 w-4" aria-hidden="true" />
                 Code
-              </Link>
+              </a>
             </Button>
           )}
         </div>
@@ -240,7 +237,7 @@ export function AllProjectsList({
 }) {
   const ordered = sortProjects(items);
   return (
-    <section className="relative w-full px-6 py-12 sm:px-10">
+    <section className="relative w-full px-6 py-12 sm:px-10 min-h-full">
       <div className="mx-auto w-full max-w-5xl">
         <motion.h1
           initial={{ opacity: 0, y: 8 }}

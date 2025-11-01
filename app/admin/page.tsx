@@ -13,7 +13,6 @@ import {
   serverTimestamp,
   query,
   orderBy,
-  getDocs,
   Timestamp,
   where,
 } from "firebase/firestore";
@@ -340,6 +339,30 @@ function ProjectForm({
   const [starred, setStarred] = useState(!!initial?.starred);
   const [pinned, setPinned] = useState(!!initial?.pinned);
   const [saving, setSaving] = useState(false);
+  const [content, setContent] = useState(initial?.content || "");
+  const [additionalInfo, setAdditionalInfo] = useState<
+    { title: string; answer: string }[]
+  >(initial?.additionalInfo || []);
+
+  const addAI = () => {
+    setAdditionalInfo((prev) => [...prev, { title: "", answer: "" }]);
+  };
+
+  const updateAI = (
+    index: number,
+    field: "title" | "answer",
+    value: string
+  ) => {
+    setAdditionalInfo((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  };
+
+  const deleteAI = (index: number) => {
+    setAdditionalInfo((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const save = async () => {
     setSaving(true);
@@ -358,6 +381,8 @@ function ProjectForm({
           starred,
           pinned,
           updatedAt: new Date().toISOString(),
+          content,
+          additionalInfo,
         });
         await updateDocClean(doc(db, "projects", id), payload as any);
       } else {
@@ -374,6 +399,8 @@ function ProjectForm({
           starred,
           pinned,
           updatedAt: new Date().toISOString(),
+          content,
+          additionalInfo,
         });
         await setDocClean(doc(db, "projects", id), {
           ...payload,
@@ -405,6 +432,78 @@ function ProjectForm({
           rows={4}
         />
       </div>
+      <div className="grid gap-2">
+        <Label htmlFor="n-content">Content</Label>
+        <Textarea
+          id="n-content"
+          rows={6}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+      </div>
+
+      {/* Additional Info (expandable, editable, add/delete) */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label>Additional info</Label>
+          <Button type="button" variant="outline" onClick={addAI}>
+            + Add item
+          </Button>
+        </div>
+
+        {additionalInfo.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No items yet. Click <span className="font-medium">Add item</span> to
+            create one.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {additionalInfo.map((ai, idx) => (
+              <details key={idx} className="rounded-lg border">
+                <summary className="cursor-pointer select-none px-4 py-3 flex items-center justify-between">
+                  <span className="truncate">
+                    {ai.title?.trim() ? ai.title : "Untitled item"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Click to expand
+                  </span>
+                </summary>
+                <div className="p-4 space-y-3">
+                  <div className="grid gap-2">
+                    <Label htmlFor={`ai-title-${idx}`}>Title</Label>
+                    <Input
+                      id={`ai-title-${idx}`}
+                      value={ai.title}
+                      onChange={(e) => updateAI(idx, "title", e.target.value)}
+                      placeholder="e.g., Tech stack"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor={`ai-answer-${idx}`}>Answer</Label>
+                    <Textarea
+                      id={`ai-answer-${idx}`}
+                      rows={4}
+                      value={ai.answer}
+                      onChange={(e) => updateAI(idx, "answer", e.target.value)}
+                      placeholder="Enter the details that expand under this title..."
+                    />
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => deleteAI(idx)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              </details>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="grid gap-2">
         <Label htmlFor="p-cover">Cover image URL (or upload below)</Label>
         <Input
@@ -820,7 +919,7 @@ const NewsList = () => {
     const unsub = onSnapshot(qy, (snap) => {
       const next: NewsItem[] = snap.docs.map((d) => ({
         id: d.id,
-        ...(d.data() as any),
+        ...(d.data() as NewsItem),
       }));
       setItems(next);
     });
@@ -1206,6 +1305,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { MessageItem } from "../types/messages";
+import { stringify } from "querystring";
 
 type TabKey = "unread" | "read" | "starred" | "trash";
 

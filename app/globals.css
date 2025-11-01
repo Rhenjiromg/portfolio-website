@@ -154,3 +154,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+body, html {
+  user-select: none;
+}

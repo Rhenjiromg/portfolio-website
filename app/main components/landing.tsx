@@ -29,7 +29,7 @@ export default function LandingInfo() {
     loop: false,
   });
   return (
-    <section className="relative flex h-min w-full items-center justify-center overflow-hidden px-6 py-3 sm:px-10 flex-col mt-10 md:mt-0">
+    <section className="overflow-x-hidden relative flex py-12 md:min-h-screen w-full items-center justify-center overflow-hidden px-6 md:py-3 sm:px-10 flex-col mt-10 md:mt-0">
       {/* Background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-background" />
@@ -53,12 +53,12 @@ export default function LandingInfo() {
         />
       </div>
       {/* Content Card */}
-      <div className="flex flex-row sm:flex-col">
+      <div className="flex flex-col sm:flex-col lg:flex-row-reverse lg:items-start lg:gap-8 justify-center">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="hidden sm:flex items-center justify-center w-full sm:py-2"
+          className="hidden sm:flex items-center justify-center w-full sm:py-2 lg:w-80 xl:w-96 lg:flex-shrink-0"
           aria-label="Intro / hero section"
           aria-hidden={true}
         >
@@ -66,7 +66,7 @@ export default function LandingInfo() {
             <img
               src="/me.jpeg"
               alt="Portrait of me"
-              className="rounded-2xl w-30 h-30 md:w-90 md:h-90 object-cover"
+              className="rounded-2xl w-30 h-30 md:w-90 md:h-90 object-cover mt-3"
             />
           </div>
         </motion.div>

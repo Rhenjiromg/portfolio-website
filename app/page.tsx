@@ -27,7 +27,7 @@ export default function Home() {
       ref={topRef}
       className="min-h-screen min-w-screen overflow-y-hidden overflow-x-auto text-black gap-y-3 relative"
     >
-      <StickyHeader />
+      <StickyHeader currentRoute="home" />
       <LandingInfo />
       <News />
       <Projects />

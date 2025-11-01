@@ -27,7 +27,6 @@ function getYear(d?: string) {
 }
 
 export default function Experiences() {
-  const title = "Experiences";
   const [items, setItems] = useState<ExperienceItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -129,7 +128,7 @@ export default function Experiences() {
         )}
       </AnimatePresence>
 
-      <Header />
+      <Header currentRoute="experience" />
       {isLoading && (
         <div className="flex flex-col justify-center min-h-screen">
           <Loader2 className="animate-spin self-center justify-self-center" />
@@ -149,7 +148,7 @@ export default function Experiences() {
               transition={{ duration: 0.5 }}
               className="mb-10 text-balance text-3xl font-semibold tracking-tight sm:text-4xl"
             >
-              {title}
+              Experiences
             </motion.h2>
 
             {/* Timeline container */}

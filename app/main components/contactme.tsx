@@ -69,13 +69,15 @@ export default function ContactMe() {
   };
 
   return (
-    <div className="relative mx-auto mt-24 flex w-full max-w-2xl flex-col gap-3 md:gap-6 overflow-hidden px-6 pb-12 sm:px-10">
-      <h2 className="text-2xl font-semibold">Contact Me</h2>
+    <div className="relative mx-auto mt-24 flex w-full max-w-2xl flex-col gap-3 md:gap-6 overflow-hidden px-6 py-6 sm:px-10">
+      <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl self-center">
+        Contact Me
+      </h2>
 
       {/* Email */}
       <div className="flex flex-col gap-2">
         <label htmlFor="email" className="text-sm font-medium">
-          Enter an email I can message
+          How can I contact you
         </label>
         <input
           id="email"
@@ -99,7 +101,7 @@ export default function ContactMe() {
           id="message"
           rows={6}
           className="w-full rounded-md border border-black/10 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-black/20"
-          placeholder="Hey Rhenji..."
+          placeholder="Hey Rhenjiro..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
           disabled={submitting}

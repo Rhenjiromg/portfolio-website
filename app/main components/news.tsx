@@ -61,7 +61,7 @@ export default function News() {
   const topForMobile = ordered.slice(0, 1);
 
   return (
-    <section className="relative flex h-min w-full mt-24 overflow-hidden px-6 py-12 sm:px-10">
+    <section className="overflow-hidden relative w-full px-6 py-12 sm:px-10 ">
       {/* Background (mirrors LandingInfo look) */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
@@ -91,9 +91,9 @@ export default function News() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-6 flex justify-between gap-4 flex-col items-start"
+          className="mb-6 flex justify-between gap-4 flex-col items-start text-center flex-col"
         >
-          <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl self-center">
             See What Im Up To
           </h2>
           {ordered.length > 3 && (
@@ -192,18 +192,13 @@ function NewsCard({
         )}
 
         <div className="mt-4">
-          <Button asChild size="sm" variant="ghost" className="group/btn">
-            <Link
-              href={`/news/${item.id}`}
-              aria-label={`Read more about ${item.title}`}
-            >
-              Read more
-              <ArrowRight
-                className="ml-1.5 h-4 w-4 transition-transform group-hover/btn:translate-x-0.5"
-                aria-hidden="true"
-              />
-            </Link>
-          </Button>
+          <Link
+            href={`/news/${item.id}`}
+            aria-label={`Read more about ${item.title}`}
+            className="flex flex-row align-center"
+          >
+            Read more
+          </Link>
         </div>
       </div>
     </motion.article>

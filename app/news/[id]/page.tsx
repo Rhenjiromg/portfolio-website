@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { useParams, notFound } from "next/navigation";
+import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import useEmblaCarousel from "embla-carousel-react";
 import {
   ChevronLeft,
   ChevronRight,
-  X,
   Clock,
   CalendarDays,
   Tag as TagIcon,
@@ -18,9 +17,6 @@ import { db } from "@/app/utils/firebase";
 import { NewsItem } from "@/app/types/news";
 import Header from "@/app/main components/stickyheader";
 
-// --------------------------------------
-// Utilities
-// --------------------------------------
 const cx = (...classes: Array<string | false | null | undefined>) =>
   classes.filter(Boolean).join(" ");
 
@@ -314,17 +310,15 @@ async function fetchNewsItemById(id: string): Promise<NewsItem | null> {
     const snap = await getDoc(ref);
     if (!snap.exists()) return null;
     const raw = snap.data() as Partial<NewsItem> & {
-      publishedAt?: any;
-      updatedAt?: any;
+      publishedAt?: Timestamp;
+      updatedAt?: Timestamp;
     };
 
     // Helper to normalize Firestore Timestamp or string to ISO string
-    const toIso = (v: any): string | undefined => {
+    const toIso = (v: Timestamp): string | undefined => {
       if (!v) return undefined;
       if (typeof v === "string") return v;
       if (v instanceof Timestamp) return v.toDate().toISOString();
-      // Firestore admin Timestamp-like
-      if (typeof v.toDate === "function") return v.toDate().toISOString();
       return undefined;
     };
 
@@ -421,7 +415,7 @@ export default function Page() {
 
   return (
     <div className="bg-[] min-h-screen">
-      <Header />
+      <Header currentRoute="home" />
       <NewsItemViewer item={item} collapsedLines={8} />
     </div>
   );

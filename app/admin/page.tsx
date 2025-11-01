@@ -918,7 +918,6 @@ const NewsList = () => {
     const qy = query(collection(db, "news"), orderBy("publishedAt", "desc"));
     const unsub = onSnapshot(qy, (snap) => {
       const next: NewsItem[] = snap.docs.map((d) => ({
-        id: d.id,
         ...(d.data() as NewsItem),
       }));
       setItems(next);

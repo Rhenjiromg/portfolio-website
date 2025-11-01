@@ -315,7 +315,7 @@ async function fetchNewsItemById(id: string): Promise<NewsItem | null> {
     };
 
     // Helper to normalize Firestore Timestamp or string to ISO string
-    const toIso = (v: Timestamp): string | undefined => {
+    const toIso = (v: Timestamp | undefined): string | undefined => {
       if (!v) return undefined;
       if (typeof v === "string") return v;
       if (v instanceof Timestamp) return v.toDate().toISOString();

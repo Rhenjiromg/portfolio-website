@@ -44,6 +44,8 @@ const asProject = (d: QueryDocumentSnapshot): ProjectItem => {
     repoUrl: data.repoUrl ?? "",
     liveUrl: data.liveUrl ?? "",
     updatedAt: data.updatedAt ?? "",
+    content: "",
+    additionalInfo: [],
   };
 };
 

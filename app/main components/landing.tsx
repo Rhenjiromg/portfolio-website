@@ -21,7 +21,12 @@ export default function LandingInfo() {
     },
   ];
   const { text, cursorVisible } = useTypewriter({
-    words: ["Tech Enthusiast", "Hobbyist", "Software Developer"],
+    words: [
+      "Tech Enthusiast",
+      "Hobbyist",
+      "Web Developer",
+      "Software Developer",
+    ],
     typingSpeed: 70,
     deletingSpeed: 40,
     betweenWordsDelay: 100,
@@ -153,7 +158,7 @@ export default function LandingInfo() {
               className="w-min"
               onClick={() =>
                 window.open(
-                  "/Rhenjiro_October25.pdf",
+                  "/RhenjiroGunawan25.pdf",
                   "_blank",
                   "noopener,noreferrer"
                 )
